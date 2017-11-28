@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>日历</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .canlender {
+            height: 530px;
+            width: 1000px;
+            /*border: 1px solid #333;*/
+            margin: 30px auto;
+        }
+
+        .bgtable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .bgtable thead tr th {
+            height: 30px;
+        }
+
+        .bgtable tbody tr td {
+            height: 100px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            text-align: right;
+            vertical-align: top;
+            padding: 10px;
+        }
+
+        .bgtable tbody tr td.gray {
+            background: #eee;
+        }
+
+        .tablebox2 {
+            position: absolute;
+            top: 30px;
+            width: 100%;
+            height: 600px;
+            padding-top: 30px;
+        }
+        .tablebox2 .row{
+            height: 100px;
+            box-sizing: border-box;
+            padding-top: 30px;
+        }
+        .tablebox2 .row .scheduletable{
+            width: 100%;
+            height: 70px;
+        }
+        .tablebox2 .row .scheduletable tr{
+            width: 100%;
+            height: 20px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="canlender" id="canlendar">
+    <div class="tablebox1">
+        <table class="bgtable">
+            <thead>
+            <tr>
+                <th v-for="(item,index) in daynamearr">{{item}}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="(week,index) in theweek()">
+                <td v-for="(dayitem,index2) in week"
+                    v-bind:class="{'gray':dayitem.prevmonth || dayitem.nextmonth}">{{dayitem.day}}
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="tablebox2">
+        <div class="row">
+            <table class="scheduletable">
+                <tr><td></td></tr>
+                <tr><td></td></tr>
+                <tr><td></td></tr>
+            </table>
+        </div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+    </div>
+</div>
+</body>
+</html>
+<script type="text/javascript" src="bower_components/vue/dist/vue.js"></script>
+<script>
+    new Vue({
+        el: "#canlendar",
+        data: {
+            daynamearr: ["周日", "周一", "周二", "周三", "周四", "周五", "周六"],
+            dayarr: [],
+            year: 2017,
+            month: 11
+        },
+        mounted: function () {
+            var dayarr = [];
+            //这个月的第一天是星期几
+            var themonth1stday = (new Date(this.year, this.month - 1, 1)).getDay();
+            //这个月的最后一天：下个月的第一天减去1毫秒
+            var y = this.month == 12 ? this.year + 1 : this.year;
+            var m = this.month == 12 ? 1 : this.month;
+            var themonthdaysamount = new Date(new Date(y, m, 1) - 1).getDate();
+            //前一个月的最后一天
+            var premonthlastdate = new Date(new Date(this.year, this.month - 1, 1) - 1).getDate();
+
+            //放置上个月最后几天
+            while (themonth1stday-- > 0) {
+                dayarr.unshift({"day": premonthlastdate--, "prevmonth": true});
+            }
+            //放置这个月的日期
+            var count = 0;
+            while (themonthdaysamount-- > 0) {
+                dayarr.push({"day": ++count});
+            }
+            //放置下个月的前几天
+            var count2 = 0;
+            if (dayarr.length < 35) {
+                while (dayarr.length != 35) {
+                    dayarr.push({"day": ++count2, "nextmonth": true});
+                }
+            } else {
+                while (dayarr.length != 42) {
+                    dayarr.push({"day": ++count2, "nextmonth": true});
+                }
+            }
+
+
+            this.dayarr = dayarr;
+
+            console.log(dayarr);
+
+        },
+        methods: {
+            theweek: function () {
+                if (this.dayarr.length == 0) return [];
+//                var _arr = [[],[],[],[],[],[]];
+                var _arr = [];
+                for (var i = 0; i < this.dayarr.length / 7; i++) {
+                    var _week = [];
+                    for (var j = 0; j < 7; j++) {
+                        _week.push(this.dayarr[i * 7 + j]);
+                    }
+                    _arr.push(_week);
+                }
+                return _arr;
+            }
+        }
+    });
+</script>
